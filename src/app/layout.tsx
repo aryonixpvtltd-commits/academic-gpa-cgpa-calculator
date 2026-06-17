@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Academic GPA & CGPA Calculator",
   description:
-    "Free GPA and CGPA calculator for students. Calculate semester GPA, overall CGPA, credits, and academic performance instantly.",
+    "Academic GPA and CGPA calculator for students with university grading scales, percentage conversion, credits, and performance estimates.",
   keywords: [
     "GPA calculator",
     "CGPA calculator",
@@ -12,11 +12,13 @@ export const metadata: Metadata = {
     "semester GPA",
     "student GPA tool",
     "credit grade calculator",
+    "SPPU GPA calculator",
+    "VTU CGPA calculator",
   ],
   openGraph: {
     title: "Academic GPA & CGPA Calculator",
     description:
-      "Free GPA and CGPA calculator for students. Calculate semester GPA, overall CGPA, credits, and academic performance instantly.",
+      "Academic GPA and CGPA calculator for students with university grading scales, percentage conversion, credits, and performance estimates.",
     type: "website",
     url: "https://academic-gpa-cgpa-calculator.vercel.app",
   },
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Academic GPA & CGPA Calculator",
     description:
-      "Free GPA and CGPA calculator for students. Calculate semester GPA, overall CGPA, credits, and academic performance instantly.",
+      "Academic GPA and CGPA calculator for students with university grading scales, percentage conversion, credits, and performance estimates.",
   },
 };
 

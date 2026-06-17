@@ -1,39 +1,47 @@
 # Academic GPA & CGPA Calculator
 
-A clean, responsive, client-side web app that helps students calculate semester GPA, overall CGPA, total credits, approximate percentage, and academic performance.
+A responsive academic utility website for calculating semester GPA, cumulative CGPA, estimated percentage, and performance labels using common university grading systems.
 
-The project is built as a practical student utility website with a light, readable interface inspired by modern university portals. It does not require authentication, a database, paid APIs, or a backend server.
+This project is designed to look and feel like a realistic student project built by a Computer Engineering student for an internship assessment. It is fully client-side and does not require a backend, database, authentication, or paid API.
 
 ## Project Overview
 
-The Academic GPA & CGPA Calculator lets students enter course credits and grade points to estimate their semester GPA. Students can also enter multiple semester GPAs and credits to calculate their overall CGPA.
+The Academic GPA & CGPA Calculator helps students enter subject credits, grade points, semester GPAs, and semester credits to estimate academic performance. It includes university grading scale presets, a percentage converter, a grade point reference table, and automatic browser-based saving through local storage.
 
-Because grading systems vary across universities, the app includes a grading scale reference, realistic academic examples, and a disclaimer explaining that percentage conversions are estimates.
+Supported grading references:
+
+- SPPU (10 Point)
+- Mumbai University
+- VTU
+- Custom Scale
+
+Results are estimates and may vary depending on institution-specific grading and conversion rules.
 
 ## Features
 
 - Semester GPA calculator with editable subject rows
 - Overall CGPA calculator with editable semester rows
-- Add, remove, and clear sample rows
+- University grading scale dropdown
+- GPA to percentage converter
+- Percentage to GPA converter
+- Grade point reference table
 - Total credits calculation
-- Weighted GPA and CGPA calculation
-- Approximate percentage estimate
-- Performance label: Excellent, Good, Average, or Needs Improvement
-- Clear validation messages for invalid credits or grade points
+- Total grade points calculation
+- Estimated percentage based on selected grading scale
+- Performance label: Excellent, Very Good, Good, or Average
+- Clear validation messages
+- Automatic local storage saving and restore on page reload
 - Copy result button
 - Download result as a text file
-- Reset button
-- Formula explanation and step-by-step academic example
-- Grading scale reference card
-- About section explaining GPA, CGPA, and grading-scale differences
-- Mobile responsive layout with horizontal scrolling tables
-- SEO metadata and custom favicon
-- Ready for Vercel deployment
+- Reset saved data button
+- Academic guide with step-by-step GPA example
+- Practical About section
+- Mobile, tablet, and desktop responsive layout
 
 ## GPA Formula
 
 ```text
-GPA = Sum of Credit × Grade Point / Total Credits
+GPA = Sum of Credit x Grade Point / Total Credits
 ```
 
 Example:
@@ -47,11 +55,11 @@ Example:
 Step-by-step:
 
 ```text
-Data Structures: 4 × 9 = 36
-Database Systems: 3 × 8 = 24
-Operating Systems: 4 × 8.5 = 34
+Data Structures: 4 x 9 = 36
+Database Systems: 3 x 8 = 24
+Operating Systems: 4 x 8.5 = 34
 
-Total weighted points = 36 + 24 + 34 = 94
+Total grade points = 36 + 24 + 34 = 94
 Total credits = 4 + 3 + 4 = 11
 
 GPA = 94 / 11 = 8.55
@@ -62,26 +70,24 @@ GPA = 94 / 11 = 8.55
 - Next.js
 - TypeScript
 - Tailwind CSS
-- Fully client-side React state
-- No backend
-- No database
-- No authentication
+- React client-side state
+- Browser local storage
 
 ## Installation
 
-Clone the repository and install dependencies:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Start the local development server:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Open the app in your browser:
+Open the app:
 
 ```text
 http://localhost:3000
@@ -89,13 +95,13 @@ http://localhost:3000
 
 ## Build
 
-Run the production build:
+Create a production build:
 
 ```bash
 npm run build
 ```
 
-Optional lint check:
+Run linting:
 
 ```bash
 npm run lint
@@ -103,54 +109,49 @@ npm run lint
 
 ## Screenshots
 
-Add screenshots here after deploying or running the app locally.
+Add project screenshots after running or deploying the app.
 
 Suggested screenshots:
 
-- Desktop view of the Semester GPA calculator
-- Desktop view of the Overall CGPA calculator
-- Mobile view of the calculator
-- Formula, example, and grading scale section
+- Desktop calculator view
+- CGPA calculator tab
+- Percentage converter and grade reference
+- Mobile layout
 
 ```md
-![Desktop GPA Calculator](./screenshots/desktop-gpa.png)
-![Mobile GPA Calculator](./screenshots/mobile-gpa.png)
+![Desktop Calculator](./screenshots/desktop-calculator.png)
+![Mobile Calculator](./screenshots/mobile-calculator.png)
 ```
 
 ## Deployment
 
-This project is ready to deploy on Vercel.
+This project can be deployed directly to Vercel.
 
-Steps:
-
-1. Push the project to GitHub.
-2. Go to [Vercel](https://vercel.com/).
-3. Select **New Project**.
+1. Push the repository to GitHub.
+2. Open [Vercel](https://vercel.com/).
+3. Create a new project.
 4. Import the GitHub repository.
-5. Keep the default Next.js build settings.
+5. Keep the default Next.js settings.
 6. Deploy.
 
-Default Vercel settings:
+Recommended Vercel settings:
 
 ```text
 Framework Preset: Next.js
+Install Command: npm install
 Build Command: npm run build
 Output Directory: .next
-Install Command: npm install
 ```
 
 No environment variables are required.
 
+## Repository
+
+[GitHub Repository Link](https://github.com/aryonixpvtltd-commits/academic-gpa-cgpa-calculator)
+
 ## Author
 
-Built by Aryan Mandavgode for students worldwide.
+Created by Aryan Mandavgode  
+Computer Engineering Student
 
-Email: [aryanmandavgode@gmail.com](mailto:aryanmandavgode@gmail.com)
-
-Website link included in the app: [Built for Digital Heroes](https://digitalheroesco.com/)
-
-## Notes
-
-This project was built as a free trial task for Digital Heroes.
-
-Results are estimates. Different universities may use different grading scales and percentage conversion methods.
+Version 1.0
