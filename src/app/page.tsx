@@ -15,6 +15,7 @@ import {
   toNumber,
   validateSemesters,
   validateSubjects,
+  type CalculationHistoryItem,
   type GradingScaleKey,
   type Result,
   type SemesterRow,
@@ -22,6 +23,8 @@ import {
 } from "@/lib/academic-calculator";
 
 const storageKey = "academic-gpa-cgpa-calculator-v1";
+const historyKey = "academic-gpa-cgpa-calculator-history-v1";
+const containerClass = "mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8";
 
 type ActiveTab = "gpa" | "cgpa";
 
@@ -144,11 +147,13 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [converterGpa, setConverterGpa] = useState("8.5");
   const [converterPercentage, setConverterPercentage] = useState("75");
+  const [calculationHistory, setCalculationHistory] = useState<CalculationHistoryItem[]>([]);
   const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
     const restoreTimer = window.setTimeout(() => {
       const saved = window.localStorage.getItem(storageKey);
+      const savedHistory = window.localStorage.getItem(historyKey);
       if (saved) {
         try {
           const parsed = JSON.parse(saved) as Partial<StoredState>;
@@ -174,6 +179,16 @@ export default function Home() {
           window.localStorage.removeItem(storageKey);
         }
       }
+      if (savedHistory) {
+        try {
+          const parsedHistory = JSON.parse(savedHistory) as CalculationHistoryItem[];
+          if (Array.isArray(parsedHistory)) {
+            setCalculationHistory(parsedHistory.slice(0, 5));
+          }
+        } catch {
+          window.localStorage.removeItem(historyKey);
+        }
+      }
       setHasHydrated(true);
     }, 0);
 
@@ -192,6 +207,11 @@ export default function Home() {
     };
     window.localStorage.setItem(storageKey, JSON.stringify(storedState));
   }, [activeTab, converterGpa, converterPercentage, hasHydrated, scale, semesters, subjects]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    window.localStorage.setItem(historyKey, JSON.stringify(calculationHistory.slice(0, 5)));
+  }, [calculationHistory, hasHydrated]);
 
   const nextSubjectId = useMemo(
     () => Math.max(0, ...subjects.map((row) => row.id)) + 1,
@@ -227,14 +247,17 @@ export default function Home() {
     );
     const weightedGpa = totalGradePoints / totalCredits;
 
-    setMessages([]);
-    setGpaResult({
+    const result = {
       totalCredits,
       totalGradePoints,
       weightedValue: weightedGpa,
       percentage: estimatePercentage(weightedGpa, scale),
       performance: getPerformance(weightedGpa),
-    });
+    };
+
+    setMessages([]);
+    setGpaResult(result);
+    saveCalculation("gpa", result);
   }
 
   function calculateCgpa() {
@@ -252,14 +275,54 @@ export default function Home() {
     );
     const cgpa = totalGradePoints / totalCredits;
 
-    setMessages([]);
-    setCgpaResult({
+    const result = {
       totalCredits,
       totalGradePoints,
       weightedValue: cgpa,
       percentage: estimatePercentage(cgpa, scale),
       performance: getPerformance(cgpa),
-    });
+    };
+
+    setMessages([]);
+    setCgpaResult(result);
+    saveCalculation("cgpa", result);
+  }
+
+  function saveCalculation(type: ActiveTab, result: Result) {
+    const historyItem: CalculationHistoryItem = {
+      id:
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${type}`,
+      type,
+      createdAt: new Date().toISOString(),
+      scale,
+      result,
+      subjects,
+      semesters,
+    };
+    setCalculationHistory((items) => [historyItem, ...items].slice(0, 5));
+  }
+
+  function restoreCalculation(item: CalculationHistoryItem) {
+    setActiveTab(item.type);
+    setScale(item.scale);
+    setSubjects(item.subjects);
+    setSemesters(item.semesters);
+    setMessages([]);
+    if (item.type === "gpa") {
+      setGpaResult(item.result);
+      setCgpaResult(null);
+    } else {
+      setCgpaResult(item.result);
+      setGpaResult(null);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function clearHistory() {
+    setCalculationHistory([]);
+    window.localStorage.removeItem(historyKey);
   }
 
   function resetAll() {
@@ -272,8 +335,10 @@ export default function Home() {
     setScale("sppu");
     setConverterGpa("8.5");
     setConverterPercentage("75");
+    setCalculationHistory([]);
     setActiveTab("gpa");
     window.localStorage.removeItem(storageKey);
+    window.localStorage.removeItem(historyKey);
   }
 
   function clearRows() {
@@ -304,6 +369,13 @@ export default function Home() {
     ].join("\n");
   }
 
+  function formatCalculationDate(value: string) {
+    return new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value));
+  }
+
   async function copyResult() {
     await navigator.clipboard.writeText(resultText());
     setCopied(true);
@@ -323,7 +395,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-slate-950">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className={`${containerClass} py-4`}>
           <nav className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <a className="text-base font-semibold text-slate-950" href="#">
@@ -349,8 +421,8 @@ export default function Home() {
       </header>
 
       <section className="border-b border-slate-100 bg-slate-50">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
+        <div className={`${containerClass} py-7`}>
+          <div className="max-w-4xl">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
               Academic GPA & CGPA Calculator
             </h1>
@@ -362,12 +434,12 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className={`${containerClass} py-5`}>
         <section
           id="calculator"
           className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 border-b border-slate-200 pb-4 lg:grid-cols-[1fr_280px] lg:items-end">
+          <div className="grid gap-4 border-b border-slate-200 pb-4 lg:grid-cols-[1fr_320px] lg:items-end">
             <div>
               <h2 className="text-xl font-semibold text-slate-950">Calculator</h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -430,7 +502,7 @@ export default function Home() {
           )}
 
           {activeTab === "gpa" ? (
-            <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_330px]">
+            <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_360px]">
               <div className="space-y-3">
                 {subjects.map((subject, index) => (
                   <div key={subject.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -534,7 +606,7 @@ export default function Home() {
               />
             </section>
           ) : (
-            <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_330px]">
+            <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_360px]">
               <div className="space-y-3">
                 {semesters.map((semester, index) => (
                   <div key={semester.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -637,7 +709,72 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_360px]">
+        <section className="mt-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-950">Recent Calculations</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                The last five GPA or CGPA results are saved on this device for quick reference.
+              </p>
+            </div>
+            <SecondaryButton
+              type="button"
+              onClick={clearHistory}
+              disabled={calculationHistory.length === 0}
+            >
+              Clear History
+            </SecondaryButton>
+          </div>
+
+          {calculationHistory.length === 0 ? (
+            <p className="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-500">
+              No recent calculations yet. Calculate a GPA or CGPA result to add it here.
+            </p>
+          ) : (
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-[760px] text-left text-sm">
+                <thead className="text-slate-500">
+                  <tr className="border-b border-slate-200">
+                    <th className="py-2 pr-4 font-medium">Type</th>
+                    <th className="py-2 pr-4 font-medium">Date & Time</th>
+                    <th className="py-2 pr-4 font-medium">Scale</th>
+                    <th className="py-2 pr-4 font-medium">Result</th>
+                    <th className="py-2 pr-4 font-medium">Credits</th>
+                    <th className="py-2 pr-4 font-medium">Percentage</th>
+                    <th className="py-2 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {calculationHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td className="py-3 pr-4 font-medium text-slate-950">
+                        {item.type === "gpa" ? "GPA" : "CGPA"}
+                      </td>
+                      <td className="py-3 pr-4">{formatCalculationDate(item.createdAt)}</td>
+                      <td className="py-3 pr-4">{gradingScales[item.scale].label}</td>
+                      <td className="py-3 pr-4 font-semibold text-emerald-800">
+                        {formatNumber(item.result.weightedValue)}
+                      </td>
+                      <td className="py-3 pr-4">{formatNumber(item.result.totalCredits)}</td>
+                      <td className="py-3 pr-4">{formatNumber(item.result.percentage)}%</td>
+                      <td className="py-3">
+                        <button
+                          type="button"
+                          onClick={() => restoreCalculation(item)}
+                          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-3 focus:ring-slate-100"
+                        >
+                          Restore
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_420px]">
           <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-xl font-semibold text-slate-950">Percentage Converter</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -681,18 +818,20 @@ export default function Home() {
               Use this as a starting point and adjust values according to your institution.
             </p>
             <div className="mt-4 overflow-x-auto">
-              <table className="min-w-[280px] text-left text-sm">
+              <table className="min-w-[420px] text-left text-sm">
                 <thead className="text-slate-500">
                   <tr className="border-b border-slate-200">
-                    <th className="py-2 pr-8 font-medium">Grade</th>
-                    <th className="py-2 font-medium">Point</th>
+                    <th className="py-2 pr-6 font-medium">Grade</th>
+                    <th className="py-2 pr-6 font-medium">Point</th>
+                    <th className="py-2 font-medium">Description</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {gradeReference.map((item) => (
                     <tr key={item.grade}>
-                      <th className="py-2 pr-8 font-medium text-slate-950">{item.grade}</th>
-                      <td className="py-2">{item.point}</td>
+                      <th className="py-2 pr-6 font-medium text-slate-950">{item.grade}</th>
+                      <td className="py-2 pr-6">{item.point}</td>
+                      <td className="py-2">{item.description}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -701,7 +840,7 @@ export default function Home() {
           </article>
         </section>
 
-        <section id="gpa-guide" className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section id="gpa-guide" className="mt-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">GPA Guide</h2>
           <div className="mt-4 grid gap-5 lg:grid-cols-2">
             <div>
@@ -751,21 +890,50 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="about" className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section id="about" className="mt-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">About This Tool</h2>
-          <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-600">
-            This calculator was developed to help students quickly estimate GPA, CGPA, and
-            academic percentage using common university grading systems. Results are estimates and
-            may vary depending on institution-specific rules.
-          </p>
+          <div className="mt-4 grid gap-4 text-sm leading-6 text-slate-600 md:grid-cols-2">
+            <div className="rounded-lg bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-950">Purpose</h3>
+              <p className="mt-1">
+                This calculator helps students estimate semester GPA, cumulative CGPA, total
+                credits, grade points, and academic percentage from one practical form.
+              </p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-950">Supported grading systems</h3>
+              <p className="mt-1">
+                It includes SPPU, Mumbai University, VTU, and a Custom Scale option for students
+                whose institutions use different conversion rules.
+              </p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-950">Calculation methodology</h3>
+              <p className="mt-1">
+                GPA and CGPA are calculated using weighted averages, where each grade point is
+                multiplied by its credit value before dividing by total credits.
+              </p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-4">
+              <h3 className="font-semibold text-slate-950">Disclaimer</h3>
+              <p className="mt-1">
+                Final results may vary because universities can define grade points, rounding, and
+                percentage conversion formulas differently.
+              </p>
+            </div>
+          </div>
         </section>
       </div>
 
       <footer className="border-t border-slate-200 bg-slate-50">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-sm text-slate-600 sm:px-6 lg:px-8">
-          <p className="font-medium text-slate-800">Created by Aryan Mandavgode</p>
-          <p>Computer Engineering Student</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+        <div className={`${containerClass} py-6 text-sm text-slate-600`}>
+          <div className="border-t border-slate-200 pt-5">
+            <p className="font-medium text-slate-800">Created by Aryan Mandavgode</p>
+            <p className="mt-1">Computer Engineering Student</p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+            <span>Academic GPA & CGPA Calculator v1.0</span>
+            <span>Last Updated: June 2026</span>
             <a
               className="font-medium text-emerald-800 hover:text-emerald-900"
               href="https://github.com/aryonixpvtltd-commits/academic-gpa-cgpa-calculator"
@@ -774,7 +942,6 @@ export default function Home() {
             >
               GitHub Repository Link
             </a>
-            <span>Version 1.0</span>
           </div>
         </div>
       </footer>

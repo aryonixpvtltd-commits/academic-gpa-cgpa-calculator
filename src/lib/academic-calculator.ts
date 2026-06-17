@@ -23,6 +23,18 @@ export type Result = {
   performance: string;
 };
 
+export type CalculationType = "gpa" | "cgpa";
+
+export type CalculationHistoryItem = {
+  id: string;
+  type: CalculationType;
+  createdAt: string;
+  scale: GradingScaleKey;
+  result: Result;
+  subjects: SubjectRow[];
+  semesters: SemesterRow[];
+};
+
 export const gradingScales: Record<
   GradingScaleKey,
   {
@@ -70,12 +82,13 @@ export const sampleSemesters: SemesterRow[] = [
 ];
 
 export const gradeReference = [
-  { grade: "A+", point: 10 },
-  { grade: "A", point: 9 },
-  { grade: "B+", point: 8 },
-  { grade: "B", point: 7 },
-  { grade: "C", point: 6 },
-  { grade: "D", point: 5 },
+  { grade: "O", point: 10, description: "Outstanding" },
+  { grade: "A+", point: 9, description: "Excellent" },
+  { grade: "A", point: 8, description: "Very Good" },
+  { grade: "B+", point: 7, description: "Good" },
+  { grade: "B", point: 6, description: "Above Average" },
+  { grade: "C", point: 5, description: "Average" },
+  { grade: "D", point: 4, description: "Pass" },
 ];
 
 export function emptySubject(id: number): SubjectRow {
@@ -119,10 +132,12 @@ export function estimateGpaFromPercentage(value: number, scale: GradingScaleKey)
 }
 
 export function getPerformance(value: number) {
-  if (value >= 9) return "Excellent";
-  if (value >= 8) return "Very Good";
+  if (value >= 9.5) return "Outstanding";
+  if (value >= 8.5) return "Excellent";
+  if (value >= 7.5) return "Very Good";
   if (value >= 6.5) return "Good";
-  return "Average";
+  if (value >= 5) return "Average";
+  return "Needs Improvement";
 }
 
 export function formatNumber(value: number) {

@@ -6,7 +6,7 @@ This project is designed to look and feel like a realistic student project built
 
 ## Project Overview
 
-The Academic GPA & CGPA Calculator helps students enter subject credits, grade points, semester GPAs, and semester credits to estimate academic performance. It includes university grading scale presets, a percentage converter, a grade point reference table, and automatic browser-based saving through local storage.
+The Academic GPA & CGPA Calculator helps students enter subject credits, grade points, semester GPAs, and semester credits to estimate academic performance. It includes university grading scale presets, a percentage converter, a grade point reference table, recent calculation history, and automatic browser-based saving through local storage.
 
 Supported grading references:
 
@@ -25,17 +25,19 @@ Results are estimates and may vary depending on institution-specific grading and
 - GPA to percentage converter
 - Percentage to GPA converter
 - Grade point reference table
+- Recent calculations history with one-click restore
+- Last 5 GPA or CGPA calculations saved in local storage
 - Total credits calculation
 - Total grade points calculation
 - Estimated percentage based on selected grading scale
-- Performance label: Excellent, Very Good, Good, or Average
+- Performance label: Outstanding, Excellent, Very Good, Good, Average, or Needs Improvement
 - Clear validation messages
 - Automatic local storage saving and restore on page reload
 - Copy result button
 - Download result as a text file
 - Reset saved data button
 - Academic guide with step-by-step GPA example
-- Practical About section
+- Documentation-style About section with purpose, supported systems, methodology, and disclaimer
 - Mobile, tablet, and desktop responsive layout
 
 ## GPA Formula
@@ -154,4 +156,5 @@ No environment variables are required.
 Created by Aryan Mandavgode  
 Computer Engineering Student
 
-Version 1.0
+Academic GPA & CGPA Calculator v1.0  
+Last Updated: June 2026
